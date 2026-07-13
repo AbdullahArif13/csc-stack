@@ -222,12 +222,12 @@ function TemplateDetailModal({ template, onClose }) {
     const exampleValues = {};
     for (const varName of variableNames) {
       exampleValues[varName] =
-        varName.toLowerCase() === "nama" ? "Bapak Abdillah" : `<isi ${varName}>`;
+        varName.toLowerCase() === "nama" ? "<isi_dengan_nama>" : `<isi ${varName}>`;
     }
     const payload = {
       template_wa: name || template.name,
-      no_wa: "6285723532711",
-      nama_wa: "Bapak Fauzi",
+      no_wa: "<isi_dengan_nomor>",
+      nama_wa: "<isi_dengan_nama>",
       values: exampleValues,
     };
     const endpoint = `${API_BASE_URL.replace(/\/+$/, "")}/send-message`;
