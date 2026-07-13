@@ -1,0 +1,100 @@
+# Full stack CSC Dashboard v3 — BENAR-BENAR TERPISAH dari v2.
+#
+# Nama container, port, dan volume di sini SEMUANYA beda dari v2, jadi
+# stack ini bisa dinyalakan BERBARENGAN dengan v2 tanpa bentrok, dan
+# datanya (Postgres, sesi WhatsApp) FRESH BARU -- tidak nyambung/warisan
+# apapun dari v2.
+#
+# v3.1: migrasi database dari MySQL -> PostgreSQL, dan phpMyAdmin
+# dihapus (tidak ada GUI database bawaan lagi). Kalau perlu lihat isi
+# database secara visual, pakai DBeaver / TablePlus / psql langsung, atau
+# jalankan `docker exec -it csc-postgres-v3 psql -U $POSTGRES_USER -d $POSTGRES_DB`.
+#
+# SEBELUM JALANIN, WAJIB:
+#   cp .env.example .env                       (isi semua password acak)
+#   cp csc-backend/.env.example csc-backend/.env
+#   cp csc-dashboard/.env.example csc-dashboard/.env
+#   -> isi BACKEND_API_KEY (backend) & VITE_API_KEY (frontend) dengan
+#      NILAI YANG SAMA PERSIS dengan BACKEND_API_KEY di .env root ini.
+#
+# Jalankan dari folder ini:
+#   docker compose up -d --build
+#
+# Service yang dinyalakan (PORT BEDA DARI v2):
+#   postgres    -> database, port 5442 (localhost only)
+#   whatsapp    -> GOWA, http://localhost:3010 (localhost only -- scan QR di sini)
+#   backend     -> Express API, http://localhost:3011
+#   frontend    -> React/Vite dashboard, http://localhost:5183
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: csc-postgres-v3
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5442:5432"
+    volumes:
+      - csc_postgres_data_v3:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  whatsapp:
+    image: aldinokemal2104/go-whatsapp-web-multidevice
+    container_name: csc-whatsapp-v3
+    restart: unless-stopped
+    command: rest
+    ports:
+      - "127.0.0.1:3010:3000"
+    volumes:
+      - csc_whatsapp_storage_v3:/app/storages
+
+  backend:
+    build: ./csc-backend
+    container_name: csc-backend-v3
+    restart: unless-stopped
+    env_file:
+      - ./csc-backend/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      GOWA_BASE_URL: http://whatsapp:3000
+      BACKEND_API_KEY: ${BACKEND_API_KEY}
+    volumes:
+      - ./csc-backend:/app
+      - /app/node_modules
+    ports:
+      - "3011:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      whatsapp:
+        condition: service_started
+
+  frontend:
+    build: ./csc-dashboard
+    container_name: csc-frontend-v3
+    restart: unless-stopped
+    env_file:
+      - ./csc-dashboard/.env
+    volumes:
+      - ./csc-dashboard:/app
+      - /app/node_modules
+    ports:
+      - "5183:5173"
+    depends_on:
+      - backend
+
+volumes:
+  csc_postgres_data_v3:
+  csc_whatsapp_storage_v3:
