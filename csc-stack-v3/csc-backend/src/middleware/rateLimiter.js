@@ -19,7 +19,7 @@ export const generalLimiter = rateLimit({
  */
 export const sendMessageLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 menit
-  limit: 10, // maksimal 10 pesan/menit per IP
+  limit: 50, // maksimal 50 pesan/menit per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: {
