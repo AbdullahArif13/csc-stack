@@ -43,7 +43,7 @@ export default function MessageHistory() {
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">Riwayat Pesan dari Sistem Permintaan</h2>
             <p className="text-sm text-gray-400">
-              Daftar pesan yang sudah dikirim oleh sistem permintaan lewat backend, lengkap dengan tujuannya.
+              Daftar pesan yang sudah dikirim oleh sistem permintaan.
             </p>
           </div>
         </div>

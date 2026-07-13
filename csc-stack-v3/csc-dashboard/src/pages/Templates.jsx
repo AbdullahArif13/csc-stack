@@ -339,13 +339,6 @@ function TemplateDetailModal({ template, onClose }) {
             <pre className="h-64 w-full overflow-auto whitespace-pre-wrap rounded-lg bg-gray-100 p-4 text-xs text-gray-700">
               {curlDisplay}
             </pre>
-            <p className="mt-1 text-xs text-gray-400">
-              X-API-Key disamarkan di layar, dan tombol "Copy" pun{" "}
-              <span className="font-semibold">tidak pernah menyalin key asli</span> -- yang
-              disalin adalah <code className="rounded bg-gray-200 px-1">$CSC_API_KEY</code>.
-              Pastikan sudah <code className="rounded bg-gray-200 px-1">export CSC_API_KEY=...</code>{" "}
-              di terminal supaya curl-nya jalan.
-            </p>
           </div>
         </div>
 
